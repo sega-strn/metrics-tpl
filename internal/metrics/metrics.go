@@ -65,13 +65,9 @@ func CollectMetrics() {
 		// Добавляем произвольное значение
 		metricsData["RandomValue"] = float64(time.Now().UnixNano() % 100)
 
-		// Отправка метрик на сервер по таймеру
-		select {
-		case <-ticker.C:
-			sendAllMetrics()
-		}
-
-		time.Sleep(pollInterval) // Пауза перед следующим сбором метрик
+		// Ждем следующего тика таймера и отправляем метрики
+		<-ticker.C
+		sendAllMetrics()
 	}
 }
 
