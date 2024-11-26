@@ -102,7 +102,7 @@ func sendMetric(metricType, name string, value float64) {
 		fmt.Println("Error sending request:", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() // Закрываем тело ответа
 
 	fmt.Println("Response Status:", resp.Status)
 }

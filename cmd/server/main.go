@@ -8,12 +8,6 @@ import (
 	"github.com/sega-strn/metrics-tpl/internal/storage"
 )
 
-func UpdateMetrics(w http.ResponseWriter, r *http.Request) {
-	// Обработка логики получения и хранения метрик
-	fmt.Fprintf(w, "Metrics updated successfully")
-
-}
-
 func main() {
 
 	storage := storage.NewMemStorage()
@@ -25,5 +19,3 @@ func main() {
 		fmt.Println("Failed to start server:", err)
 	}
 }
-
-// UpdateMetrics обрабатывает запросы на обновление метрик от агента.

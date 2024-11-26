@@ -13,7 +13,7 @@ func TestMetricsHandler(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Создаем экземпляр MemStorage для передачи в обработчик
-	storage := storage.NewMemStorage() // Убедитесь, что эта функция определена
+	storage := storage.NewMemStorage()
 	handler := MetricsHandler(storage)
 
 	// Вызываем обработчик
