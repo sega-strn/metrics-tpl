@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import "github.com/sega-strn/metrics-tpl/internal/metrics"
 
 func main() {
-	fmt.Println("Agent is not implemented yet.")
+	go metrics.CollectMetrics()
+
+	// Бесконечный цикл для поддержания работы агента
+	select {}
 }
