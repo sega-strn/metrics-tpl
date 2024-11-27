@@ -9,12 +9,13 @@ import (
 	"time"
 )
 
+// Константы
 const (
 	serverAddress  = "http://localhost:8080/update"
-	pollInterval   = 2 * time.Second
 	reportInterval = 10 * time.Second // Интервал отправки метрик
 )
 
+// Переменные
 var (
 	pollCount   int64
 	metricsData = make(map[string]float64) // Для хранения собранных метрик
@@ -22,7 +23,7 @@ var (
 
 // CollectMetrics собирает метрики и отправляет их на сервер.
 func CollectMetrics() {
-	ticker := time.NewTicker(reportInterval) // reportInterval = 10 секунд
+	ticker := time.NewTicker(reportInterval)
 	defer ticker.Stop()
 
 	for {
@@ -30,34 +31,8 @@ func CollectMetrics() {
 		var memStats runtime.MemStats
 		runtime.ReadMemStats(&memStats)
 
-		// Сохраняем собранные метрики в мапу
-		metricsData["Alloc"] = float64(memStats.Alloc)
-		metricsData["BuckHashSys"] = float64(memStats.BuckHashSys)
-		metricsData["Frees"] = float64(memStats.Frees)
-		metricsData["GCCPUFraction"] = float64(memStats.GCCPUFraction)
-		metricsData["GCSys"] = float64(memStats.GCSys)
-		metricsData["HeapAlloc"] = float64(memStats.HeapAlloc)
-		metricsData["HeapIdle"] = float64(memStats.HeapIdle)
-		metricsData["HeapInuse"] = float64(memStats.HeapInuse)
-		metricsData["HeapObjects"] = float64(memStats.HeapObjects)
-		metricsData["HeapReleased"] = float64(memStats.HeapReleased)
-		metricsData["HeapSys"] = float64(memStats.HeapSys)
-		metricsData["LastGC"] = float64(memStats.LastGC)
-		metricsData["Lookups"] = float64(memStats.Lookups)
-		metricsData["MCacheInuse"] = float64(memStats.MCacheInuse)
-		metricsData["MCacheSys"] = float64(memStats.MCacheSys)
-		metricsData["MSpanInuse"] = float64(memStats.MSpanInuse)
-		metricsData["MSpanSys"] = float64(memStats.MSpanSys)
-		metricsData["Mallocs"] = float64(memStats.Mallocs)
-		metricsData["NextGC"] = float64(memStats.NextGC)
-		metricsData["NumForcedGC"] = float64(memStats.NumForcedGC)
-		metricsData["NumGC"] = float64(memStats.NumGC)
-		metricsData["OtherSys"] = float64(memStats.OtherSys)
-		metricsData["PauseTotalNs"] = float64(memStats.PauseTotalNs)
-		metricsData["StackInuse"] = float64(memStats.StackInuse)
-		metricsData["StackSys"] = float64(memStats.StackSys)
-		metricsData["Sys"] = float64(memStats.Sys)
-		metricsData["TotalAlloc"] = float64(memStats.TotalAlloc)
+		// Сохраняем метрики в мапу
+		updateMetrics(&memStats)
 
 		// Увеличиваем счетчик PollCount
 		atomic.AddInt64(&pollCount, 1)
@@ -65,16 +40,50 @@ func CollectMetrics() {
 		// Добавляем произвольное значение
 		metricsData["RandomValue"] = float64(time.Now().UnixNano() % 100)
 
-		// Ждем следующего тика таймера и отправляем метрики
-		<-ticker.C
+		// Отправляем метрики
 		sendAllMetrics()
+
+		// Ждем следующего тика таймера
+		<-ticker.C
 	}
+}
+
+// updateMetrics обновляет метрики.
+func updateMetrics(memStats *runtime.MemStats) {
+	metricsData["Alloc"] = float64(memStats.Alloc)
+	metricsData["BuckHashSys"] = float64(memStats.BuckHashSys)
+	metricsData["Frees"] = float64(memStats.Frees)
+	metricsData["GCCPUFraction"] = float64(memStats.GCCPUFraction)
+	metricsData["GCSys"] = float64(memStats.GCSys)
+	metricsData["HeapAlloc"] = float64(memStats.HeapAlloc)
+	metricsData["HeapIdle"] = float64(memStats.HeapIdle)
+	metricsData["HeapInuse"] = float64(memStats.HeapInuse)
+	metricsData["HeapObjects"] = float64(memStats.HeapObjects)
+	metricsData["HeapReleased"] = float64(memStats.HeapReleased)
+	metricsData["HeapSys"] = float64(memStats.HeapSys)
+	metricsData["LastGC"] = float64(memStats.LastGC)
+	metricsData["Lookups"] = float64(memStats.Lookups)
+	metricsData["MCacheInuse"] = float64(memStats.MCacheInuse)
+	metricsData["MCacheSys"] = float64(memStats.MCacheSys)
+	metricsData["MSpanInuse"] = float64(memStats.MSpanInuse)
+	metricsData["MSpanSys"] = float64(memStats.MSpanSys)
+	metricsData["Mallocs"] = float64(memStats.Mallocs)
+	metricsData["NextGC"] = float64(memStats.NextGC)
+	metricsData["NumForcedGC"] = float64(memStats.NumForcedGC)
+	metricsData["NumGC"] = float64(memStats.NumGC)
+	metricsData["OtherSys"] = float64(memStats.OtherSys)
+	metricsData["PauseTotalNs"] = float64(memStats.PauseTotalNs)
+	metricsData["StackInuse"] = float64(memStats.StackInuse)
+	metricsData["StackSys"] = float64(memStats.StackSys)
+	metricsData["Sys"] = float64(memStats.Sys)
+	metricsData["TotalAlloc"] = float64(memStats.TotalAlloc)
 }
 
 // sendAllMetrics отправляет все собранные метрики на сервер.
 func sendAllMetrics() {
+	// Отправляем все gauge метрики
 	for name, value := range metricsData {
-		sendMetric("gauge", name, value) // Отправляем все gauge метрики
+		sendMetric("gauge", name, value)
 	}
 	// Отправляем counter метрику PollCount
 	sendMetric("counter", "PollCount", float64(atomic.LoadInt64(&pollCount)))
@@ -98,12 +107,14 @@ func sendMetric(metricType, name string, value float64) {
 		fmt.Println("Error sending request:", err)
 		return
 	}
+	defer func() {
+		if resp.Body != nil {
+			resp.Body.Close()
+		}
+	}()
 
-	// Обязательно закрываем тело ответа после использования
-	if resp != nil && resp.Body != nil {
-		defer resp.Body.Close()
+	// Проверка статуса ответа
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Error: received non-200 response:", resp.Status)
 	}
-
-	// Прочитаем тело ответа, если оно есть (или хотя бы получим статус)
-	fmt.Println("Response Status:", resp.Status)
 }
