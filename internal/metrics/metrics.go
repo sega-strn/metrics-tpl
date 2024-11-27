@@ -98,7 +98,12 @@ func sendMetric(metricType, name string, value float64) {
 		fmt.Println("Error sending request:", err)
 		return
 	}
-	defer resp.Body.Close() // Закрываем тело ответа
 
+	// Обязательно закрываем тело ответа после использования
+	if resp != nil && resp.Body != nil {
+		defer resp.Body.Close()
+	}
+
+	// Прочитаем тело ответа, если оно есть (или хотя бы получим статус)
 	fmt.Println("Response Status:", resp.Status)
 }
