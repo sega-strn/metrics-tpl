@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/sega-strn/metrics-tpl/internal/metrics"
-	"github.com/sega-strn/metrics-tpl/internal/storage"
+	"metrics-tpl/internal/metrics"
+	"metrics-tpl/internal/storage"
 )
 
 func main() {

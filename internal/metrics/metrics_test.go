@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/sega-strn/metrics-tpl/internal/storage" // Импортируем пакет storage
+	"metrics-tpl/internal/storage"
 )
 
 func TestMetricsHandler(t *testing.T) {
@@ -20,6 +20,7 @@ func TestMetricsHandler(t *testing.T) {
 	handler(w, req)
 
 	res := w.Result()
+	defer res.Body.Close() // Закрываем тело ответа
 
 	if res.StatusCode != http.StatusOK {
 		t.Errorf("Expected status OK; got %v", res.Status)
