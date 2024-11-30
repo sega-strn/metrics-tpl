@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/sega-strn/metrics-tpl/internal/storage" // Импортируем пакет storage
+	"metrics-tpl/internal/storage"
 )
 
 func TestMetricsHandler(t *testing.T) {
