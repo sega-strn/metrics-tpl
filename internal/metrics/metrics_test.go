@@ -20,6 +20,7 @@ func TestMetricsHandler(t *testing.T) {
 	handler(w, req)
 
 	res := w.Result()
+	defer res.Body.Close() // Закрываем тело ответа
 
 	if res.StatusCode != http.StatusOK {
 		t.Errorf("Expected status OK; got %v", res.Status)
