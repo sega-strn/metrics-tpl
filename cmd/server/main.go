@@ -31,17 +31,18 @@ func main() {
 		} else if metricType == "counter" {
 			value, exists = memStorage.GetCounter(metricName)
 		} else {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid metric type"})
+			c.String(http.StatusBadRequest, "Invalid metric type")
 			return
 		}
 
 		// Если метрика не найдена, возвращаем 404
 		if !exists {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Metric not found"})
+			c.String(http.StatusNotFound, "Metric not found")
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"value": value})
+		// Возвращаем значение как текст
+		c.String(http.StatusOK, fmt.Sprintf("%v", value))
 	})
 
 	// Обработчик для сохранения метрик
@@ -54,7 +55,7 @@ func main() {
 		case "gauge":
 			value, err := strconv.ParseFloat(metricValue, 64)
 			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid gauge value"})
+				c.String(http.StatusBadRequest, "Invalid gauge value")
 				return
 			}
 			memStorage.UpdateGauge(metricName, value)
@@ -62,13 +63,13 @@ func main() {
 		case "counter":
 			value, err := strconv.ParseInt(metricValue, 10, 64)
 			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid counter value"})
+				c.String(http.StatusBadRequest, "Invalid counter value")
 				return
 			}
 			memStorage.UpdateCounter(metricName, value)
 
 		default:
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid metric type"})
+			c.String(http.StatusBadRequest, "Invalid metric type")
 			return
 		}
 
