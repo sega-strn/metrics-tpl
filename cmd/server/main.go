@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -11,6 +13,17 @@ import (
 )
 
 func main() {
+	// Определяем флаги командной строки
+	serverAddr := flag.String("a", "localhost:8081", "HTTP server address")
+
+	// Парсим флаги
+	flag.Parse()
+
+	// Проверяем, нет ли неизвестных флагов
+	if flag.NArg() > 0 {
+		log.Fatalf("Unknown arguments provided: %v", flag.Args())
+	}
+
 	// Создаем хранилище
 	memStorage := storage.NewMemStorage()
 
@@ -98,9 +111,9 @@ func main() {
 		c.String(http.StatusOK, "<html><body><h1>Metrics</h1><pre>%s</pre></body></html>", metricsList)
 	})
 
-	// Запускаем сервер на порту 8080
-	fmt.Println("Server is running at http://localhost:8080")
-	if err := r.Run(":8080"); err != nil {
-		fmt.Println("Failed to start server:", err)
+	// Запускаем сервер на указанном адресе
+	fmt.Printf("Server is running at http://%s\n", *serverAddr)
+	if err := r.Run(*serverAddr); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
 	}
 }
