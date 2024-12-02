@@ -32,7 +32,7 @@ func (s *MemStorage) UpdateCounter(name string, value int64) {
 	s.counters[name] += value
 }
 
-//  методы позволяют извлекать данные о метриках, которые были ранее сохранены
+//  методы позволяющие извлекать данные о метриках, которые были ранее сохранены
 
 func (s *MemStorage) GetGauge(name string) (float64, bool) {
 	s.mu.RLock()

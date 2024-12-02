@@ -5,12 +5,20 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 
 	"metrics-tpl/internal/storage"
 
 	"github.com/gin-gonic/gin"
 )
+
+func getEnvOrDefault(key string, defaultValue string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return defaultValue
+}
 
 func main() {
 	// Определяем флаг для адреса сервера
@@ -21,6 +29,9 @@ func main() {
 	if flag.NArg() > 0 {
 		log.Fatal("Unknown argument provided: " + fmt.Sprint(flag.Args()))
 	}
+
+	// Приоритет отдаётся переменной окружения
+	address := getEnvOrDefault("ADDRESS", *serverAddr)
 
 	// Создаем хранилище
 	memStorage := storage.NewMemStorage()
@@ -113,9 +124,9 @@ func main() {
 		c.String(http.StatusOK, "<html><body><h1>Metrics</h1><pre>%s</pre></body></html>", metricsList)
 	})
 
-	// Запускаем сервер на указанном адресе
-	log.Printf("Server is running at http://%s\n", *serverAddr)
-	if err := r.Run(*serverAddr); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+	// Запускаем сервер
+	err := r.Run(address)
+	if err != nil {
+		log.Fatal(err)
 	}
 }

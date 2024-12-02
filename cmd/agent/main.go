@@ -5,7 +5,16 @@ import (
 	"fmt"
 	"log"
 	"metrics-tpl/internal/metrics"
+	"os"
+	"strconv"
 )
+
+func getEnvOrDefault(key string, defaultValue string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return defaultValue
+}
 
 func main() {
 	// определим флаги командной строки
@@ -21,10 +30,28 @@ func main() {
 		log.Fatal("Unknown argument provided: " + fmt.Sprint(flag.Args()))
 	}
 
-	//  Запускаем сбор метрики с настроенными параметрами
-	go metrics.CollectMetrics(*serverAdd, *reportInterval, *pollInterval)
+	// Приоритет отдаётся переменным окружения
+	address := getEnvOrDefault("ADDRESS", *serverAdd)
 
-	//  Бесконечный цикл для поддержание работы
+	// Получаем значения интервалов из переменных окружения
+	reportEnv := getEnvOrDefault("REPORT_INTERVAL", strconv.Itoa(*reportInterval))
+	pollEnv := getEnvOrDefault("POLL_INTERVAL", strconv.Itoa(*pollInterval))
+
+	// Преобразуем строковые значения в целые числа
+	reportIntervalValue, err := strconv.Atoi(reportEnv)
+	if err != nil {
+		log.Fatal("Invalid REPORT_INTERVAL value")
+	}
+
+	pollIntervalValue, err := strconv.Atoi(pollEnv)
+	if err != nil {
+		log.Fatal("Invalid POLL_INTERVAL value")
+	}
+
+	// Запускаем сбор метрик с настроенными параметрами
+	go metrics.CollectMetrics(address, reportIntervalValue, pollIntervalValue)
+
+	// Бесконечный цикл для поддержания работы
 	select {}
 
 }
