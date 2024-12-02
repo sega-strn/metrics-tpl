@@ -13,15 +13,13 @@ import (
 )
 
 func main() {
-	// Определяем флаги командной строки
-	serverAddr := flag.String("a", "localhost:8081", "HTTP server address")
-
-	// Парсим флаги
+	// Определяем флаг для адреса сервера
+	serverAddr := flag.String("a", "localhost:8080", "HTTP server address")
 	flag.Parse()
 
-	// Проверяем, нет ли неизвестных флагов
+	// Проверяем наличие неизвестных флагов
 	if flag.NArg() > 0 {
-		log.Fatalf("Unknown arguments provided: %v", flag.Args())
+		log.Fatal("Unknown argument provided: " + fmt.Sprint(flag.Args()))
 	}
 
 	// Создаем хранилище
@@ -64,6 +62,11 @@ func main() {
 		metricName := c.Param("metricName")
 		metricValue := c.Param("metricValue")
 
+		if metricName == "" {
+			c.String(http.StatusNotFound, "Metric name is required")
+			return
+		}
+
 		switch metricType {
 		case "gauge":
 			value, err := strconv.ParseFloat(metricValue, 64)
@@ -72,6 +75,7 @@ func main() {
 				return
 			}
 			memStorage.UpdateGauge(metricName, value)
+			c.String(http.StatusOK, "OK")
 
 		case "counter":
 			value, err := strconv.ParseInt(metricValue, 10, 64)
@@ -80,13 +84,11 @@ func main() {
 				return
 			}
 			memStorage.UpdateCounter(metricName, value)
+			c.String(http.StatusOK, "OK")
 
 		default:
-			c.String(http.StatusBadRequest, "Invalid metric type")
-			return
+			c.String(http.StatusBadRequest, "Unknown metric type")
 		}
-
-		c.Status(http.StatusOK)
 	})
 
 	// Обработчик запроса на получение списка всех метрик
@@ -112,7 +114,7 @@ func main() {
 	})
 
 	// Запускаем сервер на указанном адресе
-	fmt.Printf("Server is running at http://%s\n", *serverAddr)
+	log.Printf("Server is running at http://%s\n", *serverAddr)
 	if err := r.Run(*serverAddr); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
