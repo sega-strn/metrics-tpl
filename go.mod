@@ -1,3 +1,3 @@
-module github.com/sega-strn/metrics-tpl
+module metrics-tpl
 
 go 1.22.9
