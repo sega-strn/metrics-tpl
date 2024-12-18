@@ -1,10 +1,7 @@
 package main
 
-import "metrics-tpl/internal/metrics"
+import "fmt"
 
 func main() {
-	go metrics.CollectMetrics()
-
-	// Бесконечный цикл для поддержания работы агента
-	select {}
+	fmt.Println("Agent is not implemented yet.")
 }

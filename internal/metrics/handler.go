@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"metrics-tpl/internal/storage"
+	"github.com/sega-strn/metrics-tpl/internal/storage"
 )
 
 func MetricsHandler(storage *storage.MemStorage) http.HandlerFunc {
